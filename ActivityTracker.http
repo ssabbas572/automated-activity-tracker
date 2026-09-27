@@ -1,0 +1,54 @@
+@base = http://localhost:5080/api
+@token = demo-alice
+@session = 09af1f5f-353b-49da-8642-704d099d1bb1
+
+### List authorized cases
+GET {{base}}/cases
+Authorization: Bearer {{token}}
+
+### Discrete document action; reuse key only for retries, change it for a fresh action
+GET {{base}}/cases/1/documents/101
+Authorization: Bearer {{token}}
+Idempotency-Key: example-document-1
+
+### Add a note (send twice to demonstrate deduplication)
+POST {{base}}/cases/1/notes
+Authorization: Bearer {{token}}
+Idempotency-Key: example-note-1
+Content-Type: application/json
+
+{"text":"Reviewed executor instructions."}
+
+### Start viewing; use a fresh session GUID for each new viewing session
+PUT {{base}}/cases/1/documents/101/views/{{session}}
+Authorization: Bearer {{token}}
+Idempotency-Key: example-start-1
+
+### End viewing after a few seconds (same end key on retries)
+POST {{base}}/cases/1/documents/101/views/{{session}}/end
+Authorization: Bearer {{token}}
+Idempotency-Key: example-end-1
+
+### Timeline (eventually consistent)
+GET {{base}}/cases/1/activities
+Authorization: Bearer {{token}}
+
+### Unauthorized tenant: expected 404
+GET {{base}}/cases/2/activities
+Authorization: Bearer {{token}}
+
+### Pause, add notes, arm failure, then resume
+POST {{base}}/demo/pause
+Authorization: Bearer {{token}}
+
+### Force rollback of next projection write
+POST {{base}}/demo/fail-next
+Authorization: Bearer {{token}}
+
+### Resume
+POST {{base}}/demo/resume
+Authorization: Bearer {{token}}
+
+### Queue inspection
+GET {{base}}/demo/queue
+Authorization: Bearer {{token}}

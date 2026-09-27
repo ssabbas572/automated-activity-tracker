@@ -1,0 +1,41 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.3xx'
+      - name: Restore locked dependencies
+        run: dotnet restore AutomatedActivityTracker.sln --locked-mode
+      - name: Build
+        run: dotnet build AutomatedActivityTracker.sln --configuration Release --no-restore
+      - name: Run integration tests
+        run: dotnet test AutomatedActivityTracker.sln --configuration Release --no-build --logger "trx;LogFileName=integration.trx" --results-directory TestResults
+      - name: Publish API
+        run: dotnet publish src/ActivityTracker.Api/ActivityTracker.Api.csproj --configuration Release --no-build --output artifacts/api
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: TestResults/**/*.trx
+          if-no-files-found: warn

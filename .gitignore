@@ -1,0 +1,37 @@
+# Build and test output
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+coverage/
+*.coverage
+*.coveragexml
+
+# IDE and user settings
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+
+# Local databases and sidecar files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+*.pfx
+*.p12
+*.key
+
+# OS noise and logs
+.DS_Store
+Thumbs.db
+*.log

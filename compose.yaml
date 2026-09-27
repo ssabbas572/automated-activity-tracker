@@ -1,0 +1,11 @@
+services:
+  tracker:
+    build: .
+    ports:
+      - "127.0.0.1:5080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    volumes:
+      - tracker-data:/data
+volumes:
+  tracker-data:
